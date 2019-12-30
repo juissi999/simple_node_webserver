@@ -10,19 +10,41 @@ const cssfile = "build/style.css";
 function on_request(request, response) {
 
    if (request.method == "GET") {
-      let filetype = request.url.split(".")[1];
+
+      // index.html
       if (request.url == "/") {
          // indexfile
 
-         var filecontents = fs.readFileSync(path.join(builddir, "index.html"), {encoding: "utf8"});
-         response.writeHead(200, {"Content-type" : "text/html"});
-         response.write(filecontents);
-         response.end();
+         fs.readFile(path.join(builddir, "index.html"), {encoding: "utf8"}, (err, data) => {
+            if (err) {
+               render_404(response);
+               return;
+            }
+            response.writeHead(200, {"Content-type" : "text/html"});
+            response.write(data);
+            response.end();
+         });
+         return;
+      }
+
+      let filetype = request.url.split(".")[1];
+      if (filetype == "html") {
+         fs.readFile(path.join(builddir, request.url), (err, data) => {
+            if (err) {
+               render_404(response);
+               return;
+            }
+
+            response.writeHead(200, {"Content-type" : "text/html"});
+            response.write(data);
+            response.end();
+         });
       } else if (filetype == "css") {
          // css
 
          fs.readFile(path.join(builddir, request.url), (err, data) => {
             if (err) {
+               render_404(response);
                return;
             }
             response.writeHead(200, {"Content-type" : "text/css"});
@@ -34,6 +56,7 @@ function on_request(request, response) {
 
          fs.readFile(path.join(builddir, request.url), (err, data) => {
             if (err) {
+               render_404(response);
                return;
             }
             response.writeHead(200, {"Content-type" : "application/javascript"});
@@ -45,14 +68,26 @@ function on_request(request, response) {
 
          fs.readFile(path.join(builddir, request.url), (err, data) => {
             if (err) {
+               console.log("error")
+               render_404(response);
                return;
             }
             response.writeHead(200, {"Content-type" : "image/png"});
             response.write(data);
             response.end();   
          });
+      } else {
+         response.writeHead("405");
+         response.write("Filetype not supported by server!");
+         response.end();
       }
    }
+}
+
+function render_404(response) {
+   response.writeHead("404");
+   response.write("File not found!");
+   response.end();
 }
 
 http.createServer(on_request).listen(port);
