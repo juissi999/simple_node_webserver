@@ -1,11 +1,22 @@
 const http = require("http")
-const fs = require("fs");
+const fs = require("fs")
 const path = require("path")
 
-const port = 80;
-const builddir = "build";
-const indexfile = "build/index.html";
-const cssfile = "build/style.css";
+// cut unnecessary cli arguments out
+var arguments = process.argv.slice(2);
+
+// process arguments
+var builddir = "./build/"
+var port = 80;   
+if (arguments.length == 1) {
+   var builddir = "./build/"
+   var port = Number(arguments[0])
+} else if (arguments.length == 2) {
+   var port = Number(arguments[0])
+   var builddir = arguments[1]
+} else if (arguments.length > 2) {
+   return console.log("Incompatible argument count. Usage: \nnode server [portnum] [builddir]")
+}
 
 function on_request(request, response) {
 
@@ -90,4 +101,5 @@ function render_404(response) {
    response.end();
 }
 
+console.log("Server listening on port " + port.toString() + " using builddir \"" + builddir + "\"")
 http.createServer(on_request).listen(port);
