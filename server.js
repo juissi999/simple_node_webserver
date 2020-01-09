@@ -79,11 +79,22 @@ function on_request(request, response) {
 
          fs.readFile(path.join(builddir, request.url), (err, data) => {
             if (err) {
-               console.log("error")
                render_404(response);
                return;
             }
             response.writeHead(200, {"Content-type" : "image/png"});
+            response.write(data);
+            response.end();   
+         });
+      } else if (filetype == "jpg") {
+         // png images
+
+         fs.readFile(path.join(builddir, request.url), (err, data) => {
+            if (err) {
+               render_404(response);
+               return;
+            }
+            response.writeHead(200, {"Content-type" : "image/jpg"});
             response.write(data);
             response.end();   
          });
